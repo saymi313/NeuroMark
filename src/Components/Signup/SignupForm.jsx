@@ -28,6 +28,8 @@ const countryCodes = [
 ];
 
 const SignUpForm = () => {
+  const navigate = useNavigate(); 
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -127,7 +129,7 @@ const SignUpForm = () => {
       console.log('Form submitted successfully:', submitData);
       // Here you would typically send the data to your backend
       alert('Signup successful!');
-      useNavigate('/Dashboard'); // Redirect to login page after successful signup
+      navigate('/Dashboard'); // Redirect to dashboard page after successful signup
       // Reset form after successful submission
       setFormData({
         fullName: '',

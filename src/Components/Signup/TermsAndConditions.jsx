@@ -88,7 +88,7 @@ const TermsAndConditions = ({ isOpen, onClose }) => {
           <section>
             <h3 className="text-lg text-white font-semibold">4. Limitation of Liability</h3>
             <p className="text-gray-400">We strive to maintain high accuracy in our facial recognition system, but cannot guarantee 100% accuracy at all times. We are not liable for:</p>
-            <ul className="list-disc ml-5 text-gray-700">
+            <ul className="list-disc ml-5 text-gray-400">
               <li>Occasional system errors in facial matching</li>
               <li>Service interruptions due to maintenance or technical issues</li>
               <li>Any consequential damages arising from system use or failure</li>

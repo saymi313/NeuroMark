@@ -80,6 +80,28 @@ const Sidebar = () => {
             <Layers size={18} />
             Integrations
           </NavLink>
+          <NavLink
+            to="/signup"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
+              }`
+            }
+          >
+            {/* <Layers size={18} /> */}
+            Signup
+          </NavLink>
+          <NavLink
+            to="/login"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
+              }`
+            }
+          >
+            {/* <Layers size={18} /> */}
+            Login
+          </NavLink>
         </nav>
       </div>
 

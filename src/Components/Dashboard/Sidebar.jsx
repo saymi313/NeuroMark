@@ -5,7 +5,7 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-4">
-        <NavLink to="/" className="flex items-center">
+        <NavLink to="/dashboard" className="flex items-center">
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 w-8 h-8 rounded-md flex items-center justify-center mr-3">
             <Brain size={18} className="text-white" />
           </div>
@@ -17,7 +17,7 @@ const Sidebar = () => {
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Main</div>
         <nav className="space-y-1">
           <NavLink
-            to="/"
+            to="/dashboard"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -29,7 +29,7 @@ const Sidebar = () => {
           </NavLink>
 
           <NavLink
-            to="/analytics"
+            to="analytics"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -41,7 +41,7 @@ const Sidebar = () => {
           </NavLink>
 
           <NavLink
-            to="/users"
+            to="users"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -58,7 +58,7 @@ const Sidebar = () => {
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Administration</div>
         <nav className="space-y-1">
           <NavLink
-            to="/settings"
+            to="settings"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -70,7 +70,7 @@ const Sidebar = () => {
           </NavLink>
 
           <NavLink
-            to="/integrations"
+            to="integrations"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"

@@ -4,6 +4,7 @@ import image from '../cover.jpg';
 import { Link, useNavigate } from 'react-router-dom';
 
 const countryCodes = [
+  { code: '+92', country: 'Pak' },
   { code: '+91', country: 'India' },
   { code: '+1', country: 'USA/Canada' },
   { code: '+44', country: 'UK' },
@@ -38,7 +39,7 @@ const LoginForm = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const [countryCode, setCountryCode] = useState('+91');
+  const [countryCode, setCountryCode] = useState('+92');
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleChange = (e) => {

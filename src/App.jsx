@@ -8,8 +8,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import OnboardingPage from './Components/Onboarding';
 import Analytics from './Pages/Analytics/index';
 import Users from './Pages/Users';
-import SignUp from './Components/Signup/SignupForm';
-import Login from './Components/Login/LoginForm';
+// import SignUp from './Components/Signup/SignupForm';
+// import Login from './Components/Login/LoginForm';
 
 import './App.css';
 

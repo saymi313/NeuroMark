@@ -16,15 +16,15 @@ function App() {
   return (
 <div>
   <Routes>
+ <Route path="/" element={<Dashboard/>}>
 <Route path="/signup" element= { <SignUpForm/>}/>
  <Route path='/Login' element={ <LoginForm/>}/>
- <Route path="/" element={<Dashboard/>}>
  <Route index element={<HomePage />} />
- <Route path="analytics" element={<Analytics />} />
-<Route path="settings" element={<Settings />} />
-<Route path="users" element={<Users/>} />
-<Route path="signup" element={<SignUp/>} />
-<Route path="login" element={<Login/>} />
+ <Route path="/analytics" element={<Analytics />} />
+<Route path="/settings" element={<Settings />} />
+<Route path="/users" element={<Users/>} />
+<Route path="/signup" element={<SignUp/>} />
+<Route path="/login" element={<Login/>} />
 </Route>
 <Route path="*" element={<Navigate to="/" replace />} /> 
   </Routes>

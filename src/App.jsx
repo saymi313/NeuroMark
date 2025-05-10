@@ -5,12 +5,14 @@ import Dashboard from './Components/Dashboard/Dashboard';
 import HomePage from './Pages/Home'
 import Settings from './Pages/Settings';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Analytics from './Pages/Anaytics';
+import Analytics from './Pages/Analytics';
+import OnboardingPage from './Components/Onboarding';
 function App() {
   return (
 <div>
   <Routes>
-<Route path="/" element= { <SignUpForm/>}/>
+<Route path="/" element= { <OnboardingPage/>}/>
+<Route path='/SignUp' element={ <SignUpForm/>}/>
  <Route path='/Login' element={ <LoginForm/>}/>
  <Route path="/Dashboard" element={<Dashboard/>}>
  <Route index element={<HomePage />} />

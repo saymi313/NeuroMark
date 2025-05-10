@@ -108,13 +108,16 @@ const LoginForm = () => {
         keepLoggedIn: formData.keepLoggedIn,
       };
       console.log('Login form submitted:', submitData);
-    navigate('/Dashboard'); // Redirect to dashboard after successful signup
-    navigate('/Dashboard'); // Redirect to dashboard after successful signup
-      
+      navigate('/Dashboard'); // Redirect to dashboard after successful login
     }
   };
 
+  const handleGoBack = () => {
+    navigate('/');
+  };
+
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  
   const handleSelectCountryCode = (code) => {
     setCountryCode(code);
     setShowDropdown(false);
@@ -124,6 +127,25 @@ const LoginForm = () => {
     <div className="flex min-h-screen bg-neutral-900">
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-8">
         <div className="w-full max-w-md">
+          {/* Back button - visible on both mobile and desktop */}
+          <div className="mb-4">
+            <button 
+              onClick={handleGoBack}
+              className="flex items-center text-gray-300 hover:text-purple-500 transition-colors"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-5 w-5 mr-1" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm">Back to Home</span>
+            </button>
+          </div>
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white">Sign in</h1>
             <p className="text-gray-300 mt-2">Please login to continue to your account.</p>

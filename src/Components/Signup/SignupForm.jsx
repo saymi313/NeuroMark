@@ -144,6 +144,10 @@ const SignUpForm = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate('/');
+  };
+
   const togglePasswordVisibility = (field) => {
     if (field === 'password') {
       setShowPassword(!showPassword);
@@ -162,6 +166,25 @@ const SignUpForm = () => {
       {/* Left section - Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 md:p-8">
         <div className="w-full max-w-md">
+          {/* Back button - visible on both mobile and desktop */}
+          <div className="mb-4">
+            <button 
+              onClick={handleGoBack}
+              className="flex items-center text-gray-300 hover:text-purple-500 transition-colors"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-5 w-5 mr-1" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm">Back to Home</span>
+            </button>
+          </div>
+          
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white">Sign Up</h1>
             <p className="text-gray-300 mt-2">Please register your account before logging in</p>

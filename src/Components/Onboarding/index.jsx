@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ArrowRight, Clock, Users, BarChart3, Camera,Brain, Activity,
+  ArrowRight, Clock, Users, BarChart3, Camera, Brain, Activity,
   Shield, Check, Zap, Globe, Database, Lock,
   MonitorSmartphone, BellRing
 } from 'lucide-react';
@@ -11,7 +11,7 @@ const FeatureCard = ({ icon, title, description }) => (
   <div className={`bg-black/40 backdrop-blur-sm p-4 mb-3 transition-opacity duration-500 rounded-lg`}>
     <div className="flex items-center mb-2">
       <div className="p-2 bg-indigo-900/50 rounded-lg">
-        {React.cloneElement(icon, { size: 20, className: "text-indigo-400" })}
+        {React.cloneElement(icon, { size: 20, className: "text-indigo-400" }) }
       </div>
       <h3 className="ml-3 text-base font-bold text-white">{title}</h3>
     </div>
@@ -65,46 +65,44 @@ const TabContent = ({ activeTab, content }) => (
   </div>
 );
 
-// Header Component
-const Header = ({ redirectToSignup, redirectToLogin }) => (
-  <header className="p-4 md:p-6 flex justify-between items-center bg-gray-900/80 backdrop-blur-lg z-10 sticky top-0 border-b border-indigo-500/20">
+// Header Component - Fixed and properly positioned
+const Header = () => (
+  <header className="p-4 md:p-6 flex justify-between items-center bg-gray-900/80 backdrop-blur-lg z-50 sticky top-0 border-b border-indigo-500/20 w-full">
     <div className="flex items-center">
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 w-8 h-8 rounded-md flex items-center justify-center mr-3">
-            <Brain size={18} className="text-white" />
-          </div>
-      <h1 className="ml-2 md:ml-3 text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-300">
-        Neuro<span className='text-purple-600'>Mark </span>
+        <Brain size={18} className="text-white" />
+      </div>
+      <h1 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-300">
+        Neuro<span className="text-purple-600">Mark</span>
       </h1>
     </div>
     <div className="flex space-x-2 md:space-x-4">
-
-      <Link to="/Signup" className="text-gray-300 hover:text-white transition-colors duration-200">
-      <button 
-        className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 border border-white/20 text-sm md:text-base"
-      >
-        Sign Up
-      </button>
+      <Link to="/Signup">
+        <button 
+          className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 border border-white/20 text-sm md:text-base"
+        >
+          Sign Up
+        </button>
       </Link>
-
-      <Link to="/Login" className="text-gray-300 hover:text-white transition-colors duration-200">
-      <button 
-        className="bg-purple-600 hover:bg-indigo-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 text-sm md:text-base"
-      >
-        Login
-      </button>
+      <Link to="/Login">
+        <button 
+          className="bg-purple-600 hover:bg-indigo-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 text-sm md:text-base"
+        >
+          Login
+        </button>
       </Link>
     </div>
   </header>
 );
 
 // Hero Section Component
-const HeroSection = ({ features, currentSlide, isAnimating, goToSlide, redirectToSignup }) => (
+const HeroSection = ({ features, currentSlide, isAnimating, goToSlide }) => (
   <section className="relative overflow-hidden py-10 md:py-20">
     <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
       <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl"></div>
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-gray-900 rounded-full blur-3xl"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30 z-0"></div>
-      <div className="absolute inset-0 bg-[url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaehGKVg-WGvL1wcd9oQmodx4maeuy1vruZdO5XnYvS79tG-rW5O5RxgJCOaL4yZGAsk0&usqp=CAU  ')] opacity-50"></div>
+      {/* <div className="absolute inset-0 bg-[url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaehGKVg-WGvL1wcd9oQmodx4maeuy1vruZdO5XnYvS79tG-rW5O5RxgJCOaL4yZGAsk0&usqp=CAU')] opacity-50"></div> */}
     </div>
 
     <div className="container mx-auto px-4 md:px-6 flex flex-col lg:flex-row items-center relative z-10">
@@ -118,14 +116,13 @@ const HeroSection = ({ features, currentSlide, isAnimating, goToSlide, redirectT
             Transform your attendance tracking with AI-powered recognition technology that processes multiple camera feeds simultaneously.
           </p>
           
-          <Link to="/Signup" className="text-gray-300 hover:text-white transition-colors duration-200">
-          <button 
-            onClick={redirectToSignup}
-            className="mt-6 md:mt-8 group bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-lg font-medium flex items-center justify-center transition-all duration-300 shadow-lg shadow-indigo-900/30 mx-auto lg:mx-0"
-          >
-            Get Started
-            <ArrowRight className="ml-2 transition-transform duration-300 group-hover:translate-x-1" size={20} />
-          </button>
+          <Link to="/Signup">
+            <button 
+              className="mt-6 md:mt-8 group bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-lg font-medium flex items-center justify-center transition-all duration-300 shadow-lg shadow-indigo-900/30 mx-auto lg:mx-0"
+            >
+              Get Started
+              <ArrowRight className="ml-2 transition-transform duration-300 group-hover:translate-x-1" size={20} />
+            </button>
           </Link>
           <div className="mt-8 md:mt-12 grid grid-cols-3 gap-2 md:gap-4">
             <StatBox value="99.8%" label="Recognition Accuracy" />
@@ -367,26 +364,17 @@ export default function OnboardingPage() {
     setTimeout(() => setIsAnimating(false), 500);
   };
 
-  const redirectToSignup = () => {
-    console.log("Redirecting to signup");
-  };
-
-  const redirectToLogin = () => {
-    console.log("Redirecting to login");
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-indigo-950 text-white">
       {/* Header */}
-      <Header redirectToSignup={redirectToSignup} redirectToLogin={redirectToLogin} />
+      <Header />
 
       {/* Hero Section */}
       <HeroSection 
         features={features} 
         currentSlide={currentSlide} 
         isAnimating={isAnimating} 
-        goToSlide={goToSlide} 
-        redirectToSignup={redirectToSignup} 
+        goToSlide={goToSlide}
       />
       
       {/* Info Tabs Section */}
@@ -442,7 +430,6 @@ export default function OnboardingPage() {
         </div>
       </section>
       
-     
       {/* Footer */}
       <Footer />
     </div>

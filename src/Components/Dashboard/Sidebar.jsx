@@ -70,7 +70,7 @@ const Sidebar = () => {
           </NavLink>
 
           <NavLink
-            to="integrations"
+            to="attendance"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -78,7 +78,7 @@ const Sidebar = () => {
             }
           >
             <Layers size={18} />
-            Integrations
+            Attendance Management
           </NavLink>
           <NavLink
             to="/signup"

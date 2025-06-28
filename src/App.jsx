@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import OnboardingPage from "./Components/Onboarding";
 import Analytics from "./Pages/Analytics/index";
 import Users from "./Pages/Users";
+import Attendance from "./Pages/Attendance";
 // import SignUp from './Components/Signup/SignupForm';
 // import Login from './Components/Login/LoginForm';
 
@@ -24,6 +25,7 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
           <Route path="users" element={<Users />} />
+          <Route path="attendance" element={<Attendance />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

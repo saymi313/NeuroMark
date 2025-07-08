@@ -1,69 +1,99 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Upload, Clock, Users, Calendar, Play, Pause, Square, Download, Eye, Filter } from "lucide-react"
+import { useState } from "react"
+import { Upload, Clock, Users, Calendar, Download, Eye } from "lucide-react"
 import VideoUpload from "../../Components/Attendance/VideoUpload"
 import PhotoGallery from "../../Components/Attendance/PhotoGallery"
 import AttendanceList from "../../Components/Attendance/AttendanceList"
+import ExportModal from "../../Components/Attendance/ExportModal"
 
 export default function Attendance() {
   const [activeTab, setActiveTab] = useState("upload")
   const [uploadedVideo, setUploadedVideo] = useState(null)
   const [uploadedPhotos, setUploadedPhotos] = useState([])
-  const [processedPhotos, setProcessedPhotos] = useState([])
-  const [attendanceData, setAttendanceData] = useState([])
+  const [detectionResults, setDetectionResults] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [minimumPresenceTime, setMinimumPresenceTime] = useState(1) // Changed from 30 to 1
 
   const handleVideoUpload = (videoFile) => {
     setUploadedVideo(videoFile)
-    setIsProcessing(true)
-    
-    // Simulate processing time
-    setTimeout(() => {
-      setIsProcessing(false)
-      // Mock processed photos based on uploaded photos
-      if (uploadedPhotos.length > 0) {
-        const mockProcessedPhotos = uploadedPhotos.map((photo, index) => ({
-          id: index + 1,
-          name: photo.name,
-          photo: photo.photo,
-          time: `09:${15 + index * 5} AM`,
-          confidence: 85 + Math.random() * 15
-        }))
-        setProcessedPhotos(mockProcessedPhotos)
-      } else {
-        // Fallback mock data if no photos uploaded
-        setProcessedPhotos([
-          { id: 1, name: "John Doe", photo: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face", time: "09:15 AM", confidence: 95 },
-          { id: 2, name: "Jane Smith", photo: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face", time: "09:20 AM", confidence: 87 },
-          { id: 3, name: "Mike Johnson", photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face", time: "09:25 AM", confidence: 92 },
-          { id: 4, name: "Sarah Wilson", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face", time: "09:30 AM", confidence: 89 },
-          { id: 5, name: "David Brown", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face", time: "09:35 AM", confidence: 91 },
-        ])
-      }
-      
-      // Mock attendance data
-      setAttendanceData([
-        { id: 1, name: "John Doe", employeeId: "EMP001", clockIn: "09:15 AM", clockOut: "05:30 PM", status: "Present", avatar: "JD" },
-        { id: 2, name: "Jane Smith", employeeId: "EMP002", clockIn: "09:20 AM", clockOut: "05:25 PM", status: "Present", avatar: "JS" },
-        { id: 3, name: "Mike Johnson", employeeId: "EMP003", clockIn: "09:25 AM", clockOut: "05:35 PM", status: "Present", avatar: "MJ" },
-        { id: 4, name: "Sarah Wilson", employeeId: "EMP004", clockIn: "09:30 AM", clockOut: "05:20 PM", status: "Present", avatar: "SW" },
-        { id: 5, name: "David Brown", employeeId: "EMP005", clockIn: "09:35 AM", clockOut: "05:40 PM", status: "Present", avatar: "DB" },
-        { id: 6, name: "Emily Davis", employeeId: "EMP006", clockIn: "10:00 AM", clockOut: "05:15 PM", status: "Late", avatar: "ED" },
-        { id: 7, name: "Robert Wilson", employeeId: "EMP007", clockIn: "08:45 AM", clockOut: "05:45 PM", status: "Present", avatar: "RW" },
-      ])
-    }, 3000)
+    // Clear previous results when new video is uploaded
+    setDetectionResults([])
   }
 
   const handlePhotosUpload = (photos) => {
     setUploadedPhotos(photos)
   }
 
+  const handleDetectionResults = (results) => {
+    setDetectionResults(results)
+    console.log("Detection results received in main component:", results)
+  }
+
+  const handleMinimumPresenceTimeChange = (time) => {
+    setMinimumPresenceTime(time)
+  }
+
   const tabs = [
     { id: "upload", label: "Video Upload", icon: Upload },
-    { id: "photos", label: "Present Persons", icon: Users },
+    { id: "photos", label: "Detection Results", icon: Users },
     { id: "attendance", label: "Attendance List", icon: Calendar },
   ]
+
+  // Calculate stats from detection results
+  const getStats = () => {
+    const totalDetections = detectionResults.length
+    const detectedEmployees = detectionResults.filter((r) => r.status === "Detected").length
+    const uniqueEmployees = [...new Set(detectionResults.filter((r) => r.status === "Detected").map((r) => r.name))]
+      .length
+    const unknownFaces = detectionResults.filter((r) => r.status === "Unknown").length
+
+    return {
+      totalDetections,
+      detectedEmployees,
+      uniqueEmployees,
+      unknownFaces,
+    }
+  }
+
+  const stats = getStats()
+
+  const getAttendanceData = () => {
+    if (!detectionResults || detectionResults.length === 0) return []
+
+    const employeeMap = new Map()
+
+    detectionResults.forEach((detection, index) => {
+      if (detection.status === "Detected" && detection.name !== "Unknown") {
+        const employeeName = detection.name
+
+        if (!employeeMap.has(employeeName)) {
+          employeeMap.set(employeeName, {
+            id: index + 1,
+            name: employeeName,
+            employeeId: `EMP${String(index + 1).padStart(3, "0")}`,
+            avatar: employeeName.charAt(0).toUpperCase(),
+            clockIn: new Date().toLocaleTimeString(),
+            clockOut: "N/A",
+            status: "Present",
+            confidence: detection.confidence,
+            detections: [detection],
+            firstDetection: detection.timestamp,
+            lastDetection: detection.timestamp,
+          })
+        } else {
+          const existing = employeeMap.get(employeeName)
+          existing.detections.push(detection)
+          existing.firstDetection = Math.min(existing.firstDetection, detection.timestamp)
+          existing.lastDetection = Math.max(existing.lastDetection, detection.timestamp)
+          existing.confidence = Math.max(existing.confidence, detection.confidence)
+        }
+      }
+    })
+
+    return Array.from(employeeMap.values())
+  }
 
   return (
     <div className="space-y-6">
@@ -82,7 +112,11 @@ export default function Attendance() {
             <option>This Week</option>
             <option>This Month</option>
           </select>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2">
+          <button
+            onClick={() => setShowExportModal(true)}
+            disabled={detectionResults.length === 0}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
             <Download size={16} />
             Export
           </button>
@@ -94,13 +128,11 @@ export default function Attendance() {
         <div className="p-6 dark:bg-gray-800 dark:border-gray-700 bg-white rounded-lg shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Total Present</p>
-              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">
-                {attendanceData.filter(item => item.status === "Present").length}
-              </p>
+              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Total Detections</p>
+              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">{stats.totalDetections}</p>
             </div>
             <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
-              <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <Eye className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -108,13 +140,23 @@ export default function Attendance() {
         <div className="p-6 dark:bg-gray-800 dark:border-gray-700 bg-white rounded-lg shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Late Arrivals</p>
-              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">
-                {attendanceData.filter(item => item.status === "Late").length}
-              </p>
+              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Detected Employees</p>
+              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">{stats.detectedEmployees}</p>
             </div>
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
-              <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6 dark:bg-gray-800 dark:border-gray-700 bg-white rounded-lg shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Unique People</p>
+              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">{stats.uniqueEmployees}</p>
+            </div>
+            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+              <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </div>
@@ -123,24 +165,10 @@ export default function Attendance() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Employee Photos</p>
-              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">
-                {uploadedPhotos.length}
-              </p>
+              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">{uploadedPhotos.length}</p>
             </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-              <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 dark:bg-gray-800 dark:border-gray-700 bg-white rounded-lg shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium dark:text-gray-400 text-gray-500">Attendance Rate</p>
-              <p className="text-2xl font-semibold dark:text-white text-gray-800 mt-1">87%</p>
-            </div>
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-              <Calendar className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+              <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
         </div>
@@ -164,6 +192,16 @@ export default function Attendance() {
                 >
                   <Icon size={16} />
                   {tab.label}
+                  {tab.id === "photos" && detectionResults.length > 0 && (
+                    <span className="ml-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-xs px-2 py-0.5 rounded-full">
+                      {detectionResults.length}
+                    </span>
+                  )}
+                  {tab.id === "attendance" && stats.uniqueEmployees > 0 && (
+                    <span className="ml-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs px-2 py-0.5 rounded-full">
+                      {stats.uniqueEmployees}
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -172,30 +210,36 @@ export default function Attendance() {
 
         <div className="p-6">
           {activeTab === "upload" && (
-            <VideoUpload 
+            <VideoUpload
               onVideoUpload={handleVideoUpload}
               onPhotosUpload={handlePhotosUpload}
+              onDetectionResults={handleDetectionResults}
+              onMinimumPresenceTimeChange={handleMinimumPresenceTimeChange}
               isProcessing={isProcessing}
               uploadedVideo={uploadedVideo}
               uploadedPhotos={uploadedPhotos}
             />
           )}
-          
-          {activeTab === "photos" && (
-            <PhotoGallery 
-              photos={processedPhotos}
-              uploadedPhotos={uploadedPhotos}
-              isProcessing={isProcessing}
-            />
-          )}
-          
+
+          {activeTab === "photos" && <PhotoGallery photos={detectionResults} isProcessing={isProcessing} />}
+
           {activeTab === "attendance" && (
-            <AttendanceList 
-              attendanceData={attendanceData}
+            <AttendanceList
+              detectionResults={detectionResults}
+              attendanceData={getAttendanceData()}
+              minimumPresenceTime={minimumPresenceTime}
             />
           )}
         </div>
       </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        detectionResults={detectionResults}
+        attendanceData={getAttendanceData()}
+      />
     </div>
   )
-} 
+}

@@ -1,13 +1,36 @@
-import { useState, useRef, useEffect } from "react"
-import { Upload, Play, Pause, Square, Loader2, FileVideo, X, Camera, Users, Eye } from "lucide-react"
+"use client"
 
-const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVideo, uploadedPhotos: externalPhotos }) => {
+import { useState, useRef, useEffect } from "react"
+import { Upload, Play, Square, Loader2, FileVideo, X, Camera, Users, Eye, Sliders } from "lucide-react"
+import { uploadVideoToBackend, uploadMultipleEmployeePhotos, getEmployees } from "../../services/api"
+import ProgressTracker from "./ProgressTracker"
+import ConfidenceSlider from "./ConfidenceSlider"
+import MinimumPresenceSettings from "./MinimumPresenceSettings"
+
+const VideoUpload = ({
+  onVideoUpload,
+  onPhotosUpload,
+  onDetectionResults,
+  onMinimumPresenceTimeChange,
+  isProcessing,
+  uploadedVideo,
+  uploadedPhotos: externalPhotos,
+}) => {
   const [dragActive, setDragActive] = useState(false)
   const [photoDragActive, setPhotoDragActive] = useState(false)
   const [videoPreview, setVideoPreview] = useState(null)
   const [uploadedPhotos, setUploadedPhotos] = useState(externalPhotos || [])
   const [isLiveDetection, setIsLiveDetection] = useState(false)
   const [detectionResults, setDetectionResults] = useState([])
+  const [processingVideo, setProcessingVideo] = useState(false)
+  const [processingPhotos, setProcessingPhotos] = useState(false)
+  const [error, setError] = useState(null)
+  const [enrollmentStatus, setEnrollmentStatus] = useState("")
+  const [enrolledEmployees, setEnrolledEmployees] = useState([])
+  const [processingProgress, setProcessingProgress] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [confidenceThreshold, setConfidenceThreshold] = useState(60)
+  const [minimumPresenceTime, setMinimumPresenceTime] = useState(1) // Changed from 30 to 1
   const fileInputRef = useRef(null)
   const photoInputRef = useRef(null)
   const videoRef = useRef(null)
@@ -18,6 +41,27 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
       setUploadedPhotos(externalPhotos)
     }
   }, [externalPhotos])
+
+  // Load enrolled employees on component mount
+  useEffect(() => {
+    loadEnrolledEmployees()
+  }, [])
+
+  // Pass minimum presence time to parent
+  useEffect(() => {
+    if (onMinimumPresenceTimeChange) {
+      onMinimumPresenceTimeChange(minimumPresenceTime)
+    }
+  }, [minimumPresenceTime, onMinimumPresenceTimeChange])
+
+  const loadEnrolledEmployees = async () => {
+    try {
+      const result = await getEmployees()
+      setEnrolledEmployees(result.employees || [])
+    } catch (error) {
+      console.error("Error loading enrolled employees:", error)
+    }
+  }
 
   const handleDrag = (e) => {
     e.preventDefault()
@@ -43,7 +87,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFile(e.dataTransfer.files[0])
     }
@@ -53,9 +97,9 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
     e.preventDefault()
     e.stopPropagation()
     setPhotoDragActive(false)
-    
+
     if (e.dataTransfer.files) {
-      Array.from(e.dataTransfer.files).forEach(file => {
+      Array.from(e.dataTransfer.files).forEach((file) => {
         if (file.type.startsWith("image/")) {
           handlePhotoFile(file)
         }
@@ -63,7 +107,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
     }
   }
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (file.type.startsWith("video/")) {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -81,7 +125,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
         id: Date.now() + Math.random(),
         name: file.name.replace(/\.[^/.]+$/, ""),
         photo: e.target.result,
-        file: file
+        file: file,
       }
       const updatedPhotos = [...uploadedPhotos, newPhoto]
       setUploadedPhotos(updatedPhotos)
@@ -100,7 +144,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
 
   const handlePhotoInput = (e) => {
     if (e.target.files) {
-      Array.from(e.target.files).forEach(file => {
+      Array.from(e.target.files).forEach((file) => {
         if (file.type.startsWith("image/")) {
           handlePhotoFile(file)
         }
@@ -111,29 +155,161 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
   const removeVideo = () => {
     setVideoPreview(null)
     onVideoUpload(null)
+    setDetectionResults([])
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
   }
 
   const removePhoto = (photoId) => {
-    const updatedPhotos = uploadedPhotos.filter(photo => photo.id !== photoId)
+    const updatedPhotos = uploadedPhotos.filter((photo) => photo.id !== photoId)
     setUploadedPhotos(updatedPhotos)
     if (onPhotosUpload) {
       onPhotosUpload(updatedPhotos)
     }
   }
 
-  const startLiveDetection = () => {
+  // Enroll employees with Flask backend
+  const enrollEmployees = async () => {
+    if (uploadedPhotos.length === 0) return
+
+    setProcessingPhotos(true)
+    setError(null)
+    setEnrollmentStatus("Enrolling employees...")
+
+    try {
+      const photoFiles = uploadedPhotos.map((photo) => photo.file)
+      const result = await uploadMultipleEmployeePhotos(photoFiles)
+
+      console.log("Multiple enrollment result:", result)
+
+      if (result.results) {
+        const successful = result.results.filter((r) => r.status === "success")
+        const failed = result.results.filter((r) => r.status === "failed")
+
+        console.log(`Enrollment complete: ${successful.length} successful, ${failed.length} failed`)
+        setEnrollmentStatus(`Enrollment complete: ${successful.length} successful, ${failed.length} failed`)
+
+        if (failed.length > 0) {
+          const failedNames = failed.map((f) => f.name).join(", ")
+          setError(`Failed to enroll: ${failedNames}. Please ensure photos contain clear, front-facing faces.`)
+        } else {
+          setError(null)
+          setEnrollmentStatus(`✅ Successfully enrolled ${successful.length} employees`)
+        }
+
+        // Reload enrolled employees
+        await loadEnrolledEmployees()
+      }
+    } catch (error) {
+      console.error("Error enrolling employees:", error)
+      setError(`Failed to enroll employees: ${error.message}`)
+      setEnrollmentStatus("❌ Enrollment failed")
+    } finally {
+      setProcessingPhotos(false)
+      setTimeout(() => setEnrollmentStatus(""), 3000)
+    }
+  }
+
+  const startLiveDetection = async () => {
+    if (!uploadedVideo) {
+      setError("Please upload a video first")
+      return
+    }
+
+    if (enrolledEmployees.length === 0) {
+      setError("Please upload employee photos and enroll them first")
+      return
+    }
+
     setIsLiveDetection(true)
-    // Simulate live detection results
-    setTimeout(() => {
-      setDetectionResults([
-        { id: 1, name: "John Doe", confidence: 95, status: "Detected", time: new Date().toLocaleTimeString() },
-        { id: 2, name: "Jane Smith", confidence: 87, status: "Detected", time: new Date().toLocaleTimeString() },
-        { id: 3, name: "Unknown Person", confidence: 45, status: "Unknown", time: new Date().toLocaleTimeString() },
-      ])
+    setError(null)
+    setDetectionResults([])
+    setProcessingProgress(0)
+    setCurrentStep(1)
+
+    // Simulate progress updates
+    const progressInterval = setInterval(() => {
+      setProcessingProgress((prev) => {
+        if (prev >= 95) {
+          clearInterval(progressInterval)
+          return 95
+        }
+        return prev + Math.random() * 10
+      })
+    }, 500)
+
+    // Simulate step progression
+    const stepInterval = setInterval(() => {
+      setCurrentStep((prev) => {
+        if (prev >= 4) {
+          clearInterval(stepInterval)
+          return 4
+        }
+        return prev + 1
+      })
     }, 2000)
+
+    try {
+      console.log("Starting video processing for detection...")
+
+      const result = await uploadVideoToBackend(uploadedVideo)
+      console.log("Video processing result:", result)
+
+      // Clear intervals
+      clearInterval(progressInterval)
+      clearInterval(stepInterval)
+      setProcessingProgress(100)
+      setCurrentStep(5)
+
+      if (result.results && result.results.length > 0) {
+        const newResults = result.results
+          .filter((face) => face.confidence >= confidenceThreshold / 100)
+          .map((face, index) => ({
+            id: Date.now() + index,
+            name: face.name,
+            confidence: Math.round((face.confidence || 0) * 100),
+            status: face.name !== "Unknown" ? "Detected" : "Unknown",
+            time: new Date().toLocaleTimeString(),
+            timestamp: face.timestamp,
+            bbox: face.bbox,
+            image: face.image,
+            photo: face.image ? `data:image/jpeg;base64,${face.image}` : null,
+          }))
+
+        setDetectionResults(newResults)
+
+        if (onDetectionResults) {
+          onDetectionResults(newResults)
+        }
+
+        const uniquePeople = [...new Set(newResults.map((r) => r.name).filter((name) => name !== "Unknown"))]
+        console.log(
+          `Detection complete: Found ${newResults.length} faces, ${uniquePeople.length} unique people: ${uniquePeople.join(", ")}`,
+        )
+
+        if (uniquePeople.length === 0) {
+          setError(
+            "No enrolled employees detected in the video. Please check if the video contains clear faces of enrolled employees.",
+          )
+        }
+      } else {
+        setError("No faces detected in the video. Please ensure the video contains clear faces.")
+        setDetectionResults([])
+      }
+    } catch (error) {
+      console.error("Error starting detection:", error)
+      setError("Failed to start detection: " + error.message)
+      setDetectionResults([])
+      clearInterval(progressInterval)
+      clearInterval(stepInterval)
+    } finally {
+      setIsLiveDetection(false)
+      setTimeout(() => {
+        setCurrentStep(0)
+        setProcessingProgress(0)
+      }, 3000)
+    }
   }
 
   const stopLiveDetection = () => {
@@ -143,13 +319,36 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
 
   return (
     <div className="space-y-8">
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Enrollment Status */}
+      {enrollmentStatus && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-blue-800 dark:text-blue-200 text-sm">{enrollmentStatus}</p>
+        </div>
+      )}
+
+      {/* Enrolled Employees Status */}
+      {enrolledEmployees.length > 0 && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+          <p className="text-green-800 dark:text-green-200 text-sm">
+            ✅ {enrolledEmployees.length} employees enrolled: {enrolledEmployees.join(", ")}
+          </p>
+        </div>
+      )}
+
       {/* Video Upload Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium dark:text-white text-gray-900 flex items-center gap-2">
           <FileVideo size={20} />
           Upload Attendance Video
         </h3>
-        
+
         {!videoPreview ? (
           <div
             className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -181,18 +380,10 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
                 >
                   Choose Video File
                 </button>
-                <span className="text-sm dark:text-gray-400 text-gray-500">
-                  Supports MP4, AVI, MOV
-                </span>
+                <span className="text-sm dark:text-gray-400 text-gray-500">Supports MP4, AVI, MOV</span>
               </div>
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="video/*"
-              onChange={handleFileInput}
-              className="hidden"
-            />
+            <input ref={fileInputRef} type="file" accept="video/*" onChange={handleFileInput} className="hidden" />
           </div>
         ) : (
           <div className="space-y-4">
@@ -205,15 +396,10 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="relative bg-black rounded-lg overflow-hidden">
-              <video
-                ref={videoRef}
-                src={videoPreview}
-                className="w-full h-64 object-cover"
-                controls
-              />
-              {isProcessing && (
+              <video ref={videoRef} src={videoPreview} className="w-full h-64 object-cover" controls />
+              {(isProcessing || processingVideo || isLiveDetection) && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <div className="text-center text-white">
                     <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
@@ -223,7 +409,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
                 </div>
               )}
             </div>
-            
+
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <div className="flex items-center space-x-3">
                 <FileVideo className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -232,11 +418,11 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
                     {uploadedVideo?.name || "Video file"}
                   </p>
                   <p className="text-xs dark:text-gray-400 text-gray-500">
-                    {(uploadedVideo?.size / (1024 * 1024)).toFixed(2)} MB
+                    {uploadedVideo ? (uploadedVideo.size / (1024 * 1024)).toFixed(2) + " MB" : "Unknown size"}
                   </p>
                 </div>
               </div>
-              {isProcessing && (
+              {(isProcessing || processingVideo || isLiveDetection) && (
                 <div className="flex items-center space-x-2 text-purple-600 dark:text-purple-400">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span className="text-sm">Processing...</span>
@@ -244,6 +430,21 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
               )}
             </div>
           </div>
+        )}
+
+        {/* Progress Tracker */}
+        {(isLiveDetection || currentStep > 0) && (
+          <ProgressTracker
+            isProcessing={isLiveDetection}
+            currentStep={currentStep}
+            totalSteps={5}
+            progress={processingProgress}
+            onCancel={() => {
+              setIsLiveDetection(false)
+              setCurrentStep(0)
+              setProcessingProgress(0)
+            }}
+          />
         )}
       </div>
 
@@ -253,7 +454,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
           <Users size={20} />
           Upload Employee Photos for Face Detection
         </h3>
-        
+
         <div
           className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             photoDragActive
@@ -270,9 +471,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
               <Camera className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
-              <h3 className="text-lg font-medium dark:text-white text-gray-900">
-                Upload Employee Photos
-              </h3>
+              <h3 className="text-lg font-medium dark:text-white text-gray-900">Upload Employee Photos</h3>
               <p className="text-sm dark:text-gray-400 text-gray-500 mt-1">
                 Drag and drop employee photos here for face recognition training
               </p>
@@ -284,9 +483,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
               >
                 Choose Photo Files
               </button>
-              <span className="text-sm dark:text-gray-400 text-gray-500">
-                Supports JPG, PNG, WebP
-              </span>
+              <span className="text-sm dark:text-gray-400 text-gray-500">Supports JPG, PNG, WebP</span>
             </div>
           </div>
           <input
@@ -302,14 +499,24 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
         {/* Uploaded Photos Grid */}
         {uploadedPhotos.length > 0 && (
           <div className="space-y-4">
-            <h4 className="font-medium dark:text-white text-gray-900">
-              Uploaded Employee Photos ({uploadedPhotos.length})
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium dark:text-white text-gray-900">
+                Uploaded Employee Photos ({uploadedPhotos.length})
+              </h4>
+              <button
+                onClick={enrollEmployees}
+                disabled={processingPhotos}
+                className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {processingPhotos ? <Loader2 className="w-4 h-4 animate-spin" /> : <Users className="w-4 h-4" />}
+                {processingPhotos ? "Enrolling..." : "Enroll Employees"}
+              </button>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {uploadedPhotos.map((photo) => (
                 <div key={photo.id} className="relative group">
                   <img
-                    src={photo.photo}
+                    src={photo.photo || "/placeholder.svg"}
                     alt={photo.name}
                     className="w-full h-24 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
                   />
@@ -321,9 +528,7 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
                       <X size={16} />
                     </button>
                   </div>
-                  <p className="text-xs text-center mt-1 dark:text-gray-300 text-gray-600 truncate">
-                    {photo.name}
-                  </p>
+                  <p className="text-xs text-center mt-1 dark:text-gray-300 text-gray-600 truncate">{photo.name}</p>
                 </div>
               ))}
             </div>
@@ -331,26 +536,78 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
         )}
       </div>
 
+      {/* Detection Settings - Show when employees are enrolled */}
+      {enrolledEmployees.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium dark:text-white text-gray-900 flex items-center gap-2">
+            <Sliders size={20} />
+            Detection Settings
+          </h3>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Confidence Threshold */}
+            <ConfidenceSlider
+              initialThreshold={confidenceThreshold}
+              onThresholdChange={setConfidenceThreshold}
+              detectionResults={detectionResults}
+              disabled={isLiveDetection}
+            />
+
+            {/* Minimum Presence Time */}
+            <MinimumPresenceSettings
+              initialMinimumTime={minimumPresenceTime}
+              onMinimumTimeChange={setMinimumPresenceTime}
+              disabled={isLiveDetection}
+            />
+          </div>
+
+          {/* Combined Explanation */}
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
+              ⚙️ Detection Settings Explained
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-amber-800 dark:text-amber-200">
+              <div>
+                <strong>Confidence Threshold ({confidenceThreshold}%):</strong>
+                <ul className="mt-1 space-y-1 text-xs">
+                  <li>• Filters out low-confidence face matches</li>
+                  <li>• Higher = more accurate, fewer false positives</li>
+                  <li>• Lower = catches more faces, may include errors</li>
+                </ul>
+              </div>
+              <div>
+                <strong>Minimum Presence Time ({minimumPresenceTime}s):</strong>
+                <ul className="mt-1 space-y-1 text-xs">
+                  <li>• Time between first and last detection</li>
+                  <li>• Below threshold = marked as "Absent"</li>
+                  <li>• Filters out people who just walked by</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Live Face Detection Analysis Section */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium dark:text-white text-gray-900 flex items-center gap-2">
           <Eye size={20} />
           Live Face Detection Analysis
         </h3>
-        
+
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h4 className="font-medium dark:text-white text-gray-900">Real-time Face Detection</h4>
               <p className="text-sm dark:text-gray-400 text-gray-500">
-                Analyze the uploaded video against employee photos
+                Analyze the uploaded video against enrolled employee photos
               </p>
             </div>
             <div className="flex space-x-2">
               {!isLiveDetection ? (
                 <button
                   onClick={startLiveDetection}
-                  disabled={!videoPreview || uploadedPhotos.length === 0}
+                  disabled={!videoPreview || enrolledEmployees.length === 0}
                   className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <Play size={16} />
@@ -368,72 +625,100 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
             </div>
           </div>
 
-          {/* Live Detection Results */}
+          {/* Detection Results */}
           <div className="space-y-4">
             {isLiveDetection && (
               <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between mb-3">
-                  <h5 className="font-medium dark:text-white text-gray-900">Detection Results</h5>
+                  <h5 className="font-medium dark:text-white text-gray-900">Processing Video...</h5>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-600 dark:text-green-400">Live</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-green-500" />
+                    <span className="text-sm text-green-600 dark:text-green-400">Processing</span>
                   </div>
                 </div>
-                
-                {detectionResults.length > 0 ? (
-                  <div className="space-y-2">
-                    {detectionResults.map((result) => (
-                      <div key={result.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-600 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-3 h-3 rounded-full ${
+              </div>
+            )}
+
+            {detectionResults.length > 0 && !isLiveDetection && (
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <div className="flex items-center justify-between mb-3">
+                  <h5 className="font-medium dark:text-white text-gray-900">
+                    Detection Results ({detectionResults.length})
+                  </h5>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-600 dark:text-green-400">Complete</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {detectionResults.map((result) => (
+                    <div
+                      key={result.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-600 rounded-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        {result.image && (
+                          <img
+                            src={`data:image/jpeg;base64,${result.image}`}
+                            alt={result.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        )}
+                        <div
+                          className={`w-3 h-3 rounded-full ${
                             result.status === "Detected" ? "bg-green-500" : "bg-yellow-500"
-                          }`}></div>
-                          <div>
-                            <p className="font-medium dark:text-white text-gray-900">{result.name}</p>
-                            <p className="text-sm dark:text-gray-400 text-gray-500">
-                              Confidence: {result.confidence}%
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm dark:text-gray-400 text-gray-500">{result.time}</p>
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            result.status === "Detected" 
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                          }`}>
-                            {result.status}
-                          </span>
+                          }`}
+                        ></div>
+                        <div>
+                          <p className="font-medium dark:text-white text-gray-900">{result.name}</p>
+                          <p className="text-sm dark:text-gray-400 text-gray-500">
+                            Confidence: {result.confidence}% | Time: {result.timestamp}s
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-purple-600 dark:text-purple-400 mx-auto mb-2" />
-                    <p className="text-sm dark:text-gray-400 text-gray-500">
-                      Analyzing video for face detection...
-                    </p>
-                  </div>
-                )}
+                      <div className="text-right">
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            result.status === "Detected"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                          }`}
+                        >
+                          {result.status}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
             {/* Requirements Check */}
-            {!isLiveDetection && (
+            {!isLiveDetection && detectionResults.length === 0 && (
               <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                  Requirements for Live Detection:
-                </h5>
+                <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Requirements for Live Detection:</h5>
                 <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                  <li className={`flex items-center gap-2 ${videoPreview ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                  <li
+                    className={`flex items-center gap-2 ${videoPreview ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  >
                     {videoPreview ? "✓" : "✗"} Video uploaded
                   </li>
-                  <li className={`flex items-center gap-2 ${uploadedPhotos.length > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                  <li
+                    className={`flex items-center gap-2 ${uploadedPhotos.length > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  >
                     {uploadedPhotos.length > 0 ? "✓" : "✗"} Employee photos uploaded ({uploadedPhotos.length})
                   </li>
-                  <li className="text-blue-600 dark:text-blue-400 flex items-center gap-2">
-                    ℹ Face detection model ready
+                  <li
+                    className={`flex items-center gap-2 ${enrolledEmployees.length > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
+                  >
+                    {enrolledEmployees.length > 0 ? "✓" : "✗"} Employees enrolled ({enrolledEmployees.length})
+                  </li>
+                  <li className="text-green-600 dark:text-green-400 flex items-center gap-2">
+                    ✓ Confidence threshold: {confidenceThreshold}%
+                  </li>
+                  <li className="text-green-600 dark:text-green-400 flex items-center gap-2">
+                    ✓ Minimum presence time: {minimumPresenceTime === 0 ? "No minimum" : `${minimumPresenceTime}s`}
                   </li>
                 </ul>
               </div>
@@ -444,20 +729,18 @@ const VideoUpload = ({ onVideoUpload, onPhotosUpload, isProcessing, uploadedVide
 
       {/* Instructions */}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
-          Instructions for best results:
-        </h4>
-        <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-          <li>• Upload employee photos with their first name as filename (e.g., Farrukh.png for Farrukh Saeed)</li>
-          <li>• Upload clear, high-quality employee photos for better recognition</li>
-          <li>• Ensure good lighting in the video</li>
-          <li>• Faces should be clearly visible and facing the camera</li>
-          <li>• Avoid fast movements or blurry footage</li>
-          <li>• Recommended: 1 photo per employee for better accuracy</li>
-        </ul>
+        <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Step-by-step workflow:</h4>
+        <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
+          <li>Upload employee photos (clear, front-facing images)</li>
+          <li>Click "Enroll Employees" to train the face recognition system</li>
+          <li>Configure detection settings (confidence threshold & minimum presence time)</li>
+          <li>Upload a video file containing the employees</li>
+          <li>Click "Start Detection" to analyze the video</li>
+          <li>View results in Detection Results and Attendance List tabs</li>
+        </ol>
       </div>
     </div>
   )
 }
 
-export default VideoUpload 
+export default VideoUpload

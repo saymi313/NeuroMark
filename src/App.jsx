@@ -1,15 +1,13 @@
-import LoginForm from "./Components/Login/LoginForm";
-import SignUpForm from "./Components/Signup/SignupForm";
-import Dashboard from "./Components/Dashboard/Dashboard";
-import HomePage from "./Pages/Home";
-import Settings from "./Pages/Settings";
+import LoginForm from "./portals/admin/components/Login/LoginForm";
+import SignUpForm from "./portals/admin/components/Signup/SignupForm";
+import Dashboard from "./portals/admin/components/Dashboard/Dashboard";
+import HomePage from "./portals/admin/pages/Home";
+import Settings from "./portals/admin/pages/Settings";
 import { Routes, Route, Navigate } from "react-router-dom";
-import OnboardingPage from "./Components/Onboarding";
-import Analytics from "./Pages/Analytics/index";
-import Users from "./Pages/Users";
-import Attendance from "./Pages/Attendance";
-// import SignUp from './Components/Signup/SignupForm';
-// import Login from './Components/Login/LoginForm';
+import OnboardingPage from "./portals/admin/components/Onboarding";
+import Analytics from "./portals/admin/pages/Analytics/index";
+import Users from "./portals/admin/pages/Users";
+import Attendance from "./portals/admin/pages/Attendance";
 
 import "./App.css";
 

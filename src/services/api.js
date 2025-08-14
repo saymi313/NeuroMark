@@ -120,7 +120,7 @@ export const uploadVideoToBackend = async (videoFile) => {
   try {
     console.log("Uploading video to backend:", videoFile.name)
 
-    const response = await fetch(`${API_BASE_URL}/api/process-video`, {
+    const response = await fetch(`${API_BASE_URL}/upload-video`, {
       method: "POST",
       body: formData,
     })
@@ -144,6 +144,29 @@ export const uploadVideoToBackend = async (videoFile) => {
     return result
   } catch (error) {
     console.error("Error uploading video:", error)
+    throw error
+  }
+}
+
+// Start face detection
+export const startDetection = async (videoPath) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/start-detection`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ video_path: videoPath }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const result = await response.json()
+    return result
+  } catch (error) {
+    console.error("Error starting detection:", error)
     throw error
   }
 }
@@ -175,7 +198,7 @@ export const testServerConnection = async () => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const result = await response.json()
+    const result = await response.text()
     return result
   } catch (error) {
     console.error("Error testing server connection:", error)
@@ -225,6 +248,7 @@ export default {
   clearEmployees,
   removeEmployee,
   uploadVideoToBackend,
+  startDetection,
   getAttendanceRecords,
   testServerConnection,
   uploadVideoToSwitch,

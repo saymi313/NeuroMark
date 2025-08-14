@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Upload, Play, Square, Loader2, FileVideo, X, Camera, Users, Eye, Sliders } from "lucide-react"
-import { uploadVideoToBackend, uploadMultipleEmployeePhotos, getEmployees } from "../../services/api"
+import { uploadVideoToBackend, uploadMultipleEmployeePhotos, getEmployees, startDetection } from "../../../../services/api"
 import ProgressTracker from "./ProgressTracker"
 import ConfidenceSlider from "./ConfidenceSlider"
 import MinimumPresenceSettings from "./MinimumPresenceSettings"
@@ -30,7 +30,8 @@ const VideoUpload = ({
   const [processingProgress, setProcessingProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
   const [confidenceThreshold, setConfidenceThreshold] = useState(60)
-  const [minimumPresenceTime, setMinimumPresenceTime] = useState(1) // Changed from 30 to 1
+  const [minimumPresenceTime, setMinimumPresenceTime] = useState(1)
+  const [videoPath, setVideoPath] = useState(null)
   const fileInputRef = useRef(null)
   const photoInputRef = useRef(null)
   const videoRef = useRef(null)
@@ -156,6 +157,7 @@ const VideoUpload = ({
     setVideoPreview(null)
     onVideoUpload(null)
     setDetectionResults([])
+    setVideoPath(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -183,21 +185,10 @@ const VideoUpload = ({
 
       console.log("Multiple enrollment result:", result)
 
-      if (result.results) {
-        const successful = result.results.filter((r) => r.status === "success")
-        const failed = result.results.filter((r) => r.status === "failed")
-
-        console.log(`Enrollment complete: ${successful.length} successful, ${failed.length} failed`)
-        setEnrollmentStatus(`Enrollment complete: ${successful.length} successful, ${failed.length} failed`)
-
-        if (failed.length > 0) {
-          const failedNames = failed.map((f) => f.name).join(", ")
-          setError(`Failed to enroll: ${failedNames}. Please ensure photos contain clear, front-facing faces.`)
-        } else {
-          setError(null)
-          setEnrollmentStatus(`✅ Successfully enrolled ${successful.length} employees`)
-        }
-
+      if (result.message) {
+        setEnrollmentStatus(`✅ ${result.message}`)
+        setError(null)
+        
         // Reload enrolled employees
         await loadEnrolledEmployees()
       }
@@ -228,42 +219,22 @@ const VideoUpload = ({
     setProcessingProgress(0)
     setCurrentStep(1)
 
-    // Simulate progress updates
-    const progressInterval = setInterval(() => {
-      setProcessingProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(progressInterval)
-          return 95
-        }
-        return prev + Math.random() * 10
-      })
-    }, 500)
-
-    // Simulate step progression
-    const stepInterval = setInterval(() => {
-      setCurrentStep((prev) => {
-        if (prev >= 4) {
-          clearInterval(stepInterval)
-          return 4
-        }
-        return prev + 1
-      })
-    }, 2000)
-
     try {
-      console.log("Starting video processing for detection...")
+      // First upload the video
+      console.log("Uploading video...")
+      const uploadResult = await uploadVideoToBackend(uploadedVideo)
+      setVideoPath(uploadResult.video_path)
+      setProcessingProgress(30)
+      setCurrentStep(2)
 
-      const result = await uploadVideoToBackend(uploadedVideo)
-      console.log("Video processing result:", result)
-
-      // Clear intervals
-      clearInterval(progressInterval)
-      clearInterval(stepInterval)
+      // Then start detection
+      console.log("Starting detection...")
+      const detectionResult = await startDetection(uploadResult.video_path)
       setProcessingProgress(100)
       setCurrentStep(5)
 
-      if (result.results && result.results.length > 0) {
-        const newResults = result.results
+      if (detectionResult.results && detectionResult.results.length > 0) {
+        const newResults = detectionResult.results
           .filter((face) => face.confidence >= confidenceThreshold / 100)
           .map((face, index) => ({
             id: Date.now() + index,
@@ -301,8 +272,6 @@ const VideoUpload = ({
       console.error("Error starting detection:", error)
       setError("Failed to start detection: " + error.message)
       setDetectionResults([])
-      clearInterval(progressInterval)
-      clearInterval(stepInterval)
     } finally {
       setIsLiveDetection(false)
       setTimeout(() => {
@@ -559,31 +528,6 @@ const VideoUpload = ({
               onMinimumTimeChange={setMinimumPresenceTime}
               disabled={isLiveDetection}
             />
-          </div>
-
-          {/* Combined Explanation */}
-          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-2">
-              ⚙️ Detection Settings Explained
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-amber-800 dark:text-amber-200">
-              <div>
-                <strong>Confidence Threshold ({confidenceThreshold}%):</strong>
-                <ul className="mt-1 space-y-1 text-xs">
-                  <li>• Filters out low-confidence face matches</li>
-                  <li>• Higher = more accurate, fewer false positives</li>
-                  <li>• Lower = catches more faces, may include errors</li>
-                </ul>
-              </div>
-              <div>
-                <strong>Minimum Presence Time ({minimumPresenceTime}s):</strong>
-                <ul className="mt-1 space-y-1 text-xs">
-                  <li>• Time between first and last detection</li>
-                  <li>• Below threshold = marked as "Absent"</li>
-                  <li>• Filters out people who just walked by</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
       )}

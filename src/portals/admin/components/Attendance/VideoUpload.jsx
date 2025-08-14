@@ -187,8 +187,8 @@ const VideoUpload = ({
 
       if (result.message) {
         setEnrollmentStatus(`✅ ${result.message}`)
-        setError(null)
-        
+          setError(null)
+
         // Reload enrolled employees
         await loadEnrolledEmployees()
       }

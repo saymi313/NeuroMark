@@ -1,15 +1,15 @@
 import { NavLink } from "react-router-dom"
-import { Home, BarChart3, Settings, Users, Calendar, FileText, Send } from "lucide-react"
+import { Home, Clock, User, FileText, Calendar, HelpCircle, Send } from "lucide-react"
 
 const Sidebar = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="p-4">
-        <NavLink to="/dashboard" className="flex items-center">
+        <NavLink to="/employee" className="flex items-center">
           <div className="bg-gradient-to-r from-purple-600 to-indigo-600 w-8 h-8 rounded-md flex items-center justify-center mr-3">
-            <Home size={18} className="text-white" />
+            <User size={18} className="text-white" />
           </div>
-          <h2 className="text-2xl font-bold font-azonix text-white">NeuroMark</h2>
+          <h2 className="text-2xl font-bold font-azonix text-white">Employee Portal</h2>
         </NavLink>
       </div>
 
@@ -17,7 +17,7 @@ const Sidebar = () => {
         <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Main</div>
         <nav className="space-y-1">
           <NavLink
-            to="/dashboard"
+            to="/employee"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -29,30 +29,6 @@ const Sidebar = () => {
           </NavLink>
 
           <NavLink
-            to="analytics"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
-              }`
-            }
-          >
-            <BarChart3 size={18} />
-            Analytics
-          </NavLink>
-
-          <NavLink
-            to="users"
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
-              }`
-            }
-          >
-            <Users size={18} />
-            Users
-          </NavLink>
-
-          <NavLink
             to="attendance"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -60,12 +36,12 @@ const Sidebar = () => {
               }`
             }
           >
-            <Calendar size={18} />
-            Attendance
+            <Clock size={18} />
+            My Attendance
           </NavLink>
 
           <NavLink
-            to="leave-management"
+            to="leave-request"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
@@ -73,24 +49,48 @@ const Sidebar = () => {
             }
           >
             <Send size={18} />
-            Leave Management
+            Leave Request
           </NavLink>
-        </nav>
-      </div>
 
-      <div className="mt-6 px-3">
-        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Settings</div>
-        <nav className="space-y-1">
           <NavLink
-            to="settings"
+            to="profile"
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
               }`
             }
           >
-            <Settings size={18} />
-            Settings
+            <User size={18} />
+            Profile
+          </NavLink>
+        </nav>
+      </div>
+
+      <div className="mt-6 px-3">
+        <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Reports</div>
+        <nav className="space-y-1">
+          <NavLink
+            to="reports"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
+              }`
+            }
+          >
+            <FileText size={18} />
+            Reports
+          </NavLink>
+
+          <NavLink
+            to="schedule"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
+              }`
+            }
+          >
+            <Calendar size={18} />
+            Schedule
           </NavLink>
         </nav>
       </div>
@@ -99,13 +99,13 @@ const Sidebar = () => {
         <div className="bg-gray-700/30 rounded-lg p-3">
           <div className="flex items-start">
             <div className="p-2 bg-purple-500/20 rounded-md text-purple-400">
-              <FileText size={18} />
+              <HelpCircle size={18} />
             </div>
             <div className="ml-3">
               <h5 className="text-sm font-medium text-white">Need help?</h5>
-              <p className="text-xs text-gray-400 mt-1">Check our documentation</p>
+              <p className="text-xs text-gray-400 mt-1">Contact HR department</p>
               <a href="#" className="text-xs text-purple-400 hover:text-purple-300 mt-2 inline-block">
-                View Docs
+                Get Support
               </a>
             </div>
           </div>

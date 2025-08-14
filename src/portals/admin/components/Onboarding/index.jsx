@@ -77,6 +77,13 @@ const Header = () => (
       </h1>
     </div>
     <div className="flex space-x-2 md:space-x-4">
+      <Link to="/employee">
+        <button 
+          className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 border border-white/20 text-sm md:text-base"
+        >
+          Employee Portal
+        </button>
+      </Link>
       <Link to="/Signup">
         <button 
           className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 md:px-6 md:py-2 rounded-lg font-medium transition-all duration-300 border border-white/20 text-sm md:text-base"

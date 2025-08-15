@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Upload, Clock, Users, Calendar, Download, Eye } from "lucide-react"
-import VideoUpload from "../../Components/Attendance/VideoUpload"
-import PhotoGallery from "../../Components/Attendance/PhotoGallery"
-import AttendanceList from "../../Components/Attendance/AttendanceList"
-import ExportModal from "../../Components/Attendance/ExportModal"
+import VideoUpload from "../../components/Attendance/VideoUpload"
+import PhotoGallery from "../../components/Attendance/PhotoGallery"
+import AttendanceList from "../../components/Attendance/AttendanceList"
+import ExportModal from "../../components/Attendance/ExportModal"
 
 export default function Attendance() {
   const [activeTab, setActiveTab] = useState("upload")

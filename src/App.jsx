@@ -14,6 +14,10 @@ import LeaveManagement from "./portals/admin/pages/LeaveManagement";
 import EmployeeDashboard from "./portals/employee/components/Dashboard/Dashboard";
 import EmployeeHome from "./portals/employee/pages/Home";
 import LeaveRequest from "./portals/employee/pages/LeaveRequest";
+import EmployeeAttendance from "./portals/employee/pages/Attendance";
+import Profile from "./portals/employee/pages/Profile";
+import Reports from "./portals/employee/pages/Reports";
+import Schedule from "./portals/employee/pages/Schedule";
 
 import "./App.css";
 
@@ -38,11 +42,11 @@ function App() {
         {/* Employee Portal Routes */}
         <Route path="/employee" element={<EmployeeDashboard />}>
           <Route index element={<EmployeeHome />} />
-          <Route path="attendance" element={<div className="p-6"><h2 className="text-2xl font-bold">My Attendance</h2><p>Employee attendance page coming soon...</p></div>} />
+          <Route path="attendance" element={<EmployeeAttendance />} />
           <Route path="leave-request" element={<LeaveRequest />} />
-          <Route path="profile" element={<div className="p-6"><h2 className="text-2xl font-bold">My Profile</h2><p>Employee profile page coming soon...</p></div>} />
-          <Route path="reports" element={<div className="p-6"><h2 className="text-2xl font-bold">Reports</h2><p>Employee reports page coming soon...</p></div>} />
-          <Route path="schedule" element={<div className="p-6"><h2 className="text-2xl font-bold">Schedule</h2><p>Employee schedule page coming soon...</p></div>} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="schedule" element={<Schedule />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

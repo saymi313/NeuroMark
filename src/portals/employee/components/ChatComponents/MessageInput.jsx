@@ -2,8 +2,6 @@
 
 import { useState } from "react"
 import { Send, Smile, Paperclip, ImageIcon, FileText, Mic } from "lucide-react"
-import { Button } from "../ui/button"
-import { Input } from "../ui/input"
 
 const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
@@ -133,9 +131,7 @@ const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
     input.onchange = (e) => {
       const file = e.target.files[0]
       if (file) {
-        // Here you would typically upload the file and send a message
         console.log(`[v0] Uploading ${type} file:`, file.name)
-        // For demo purposes, we'll just add a message indicating file upload
         onSendMessage(`📎 Shared ${type}: ${file.name}`)
       }
     }
@@ -149,14 +145,12 @@ const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
       <div className="flex items-end gap-3">
         {/* File Upload Button */}
         <div className="relative">
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => setShowFileOptions(!showFileOptions)}
-            className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100"
+            className="p-2 text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 rounded-lg transition-colors duration-200"
           >
             <Paperclip className="w-4 h-4" />
-          </Button>
+          </button>
 
           {showFileOptions && (
             <div className="absolute bottom-full left-0 mb-2 w-48 bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-xl border border-purple-500/30 rounded-lg shadow-xl shadow-purple-500/20 z-50 animate-in slide-in-from-bottom-2 duration-200">
@@ -188,11 +182,12 @@ const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
         </div>
 
         <div className="flex-1 relative">
-          <Input
+          <input
+            type="text"
             placeholder="Type your message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="pr-12 py-3 bg-purple-950/30 border-purple-400/30 text-purple-100 placeholder:text-purple-300/60 rounded-xl focus:border-purple-400/60 focus:ring-purple-400/20 shadow-lg shadow-purple-500/10"
+            className="w-full pr-12 py-3 bg-purple-950/30 border border-purple-400/30 text-purple-100 placeholder:text-purple-300/60 rounded-xl focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 shadow-lg shadow-purple-500/10 outline-none transition-all duration-200"
             onKeyPress={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault()
@@ -206,14 +201,12 @@ const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
 
           {/* Emoji Button */}
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="text-purple-200 hover:bg-purple-500/10"
+              className="p-2 text-purple-200 hover:bg-purple-500/10 rounded-lg transition-colors duration-200"
             >
               <Smile className="w-4 h-4" />
-            </Button>
+            </button>
 
             {showEmojiPicker && (
               <div className="absolute bottom-full right-0 mb-2 w-80 h-64 bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-xl border border-purple-500/30 rounded-lg shadow-xl shadow-purple-500/20 z-50 animate-in slide-in-from-bottom-2 duration-200">
@@ -239,17 +232,17 @@ const MessageInput = ({ newMessage, setNewMessage, onSendMessage }) => {
           </div>
         </div>
 
-        <Button
+        <button
           onClick={() => {
             if (newMessage.trim()) {
               onSendMessage(newMessage)
               setNewMessage("")
             }
           }}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-lg shadow-purple-500/30 transition-all duration-300"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-lg shadow-purple-500/30 transition-all duration-300 text-white font-medium"
         >
           <Send className="w-4 h-4" />
-        </Button>
+        </button>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { Home, Clock, User, FileText, Calendar, HelpCircle, Send } from "lucide-react"
+import { Home, Clock, User, FileText, Calendar, HelpCircle, Send, MessageCircle } from "lucide-react"
 
 const Sidebar = () => {
   return (
@@ -51,6 +51,18 @@ const Sidebar = () => {
           >
             <Send size={18} />
             Leave Request
+          </NavLink>
+
+          <NavLink
+            to="/employee/chat"
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                isActive ? "bg-gray-700/60 text-white" : "text-gray-300 hover:text-white hover:bg-gray-700/40"
+              }`
+            }
+          >
+            <MessageCircle size={18} />
+            Chat
           </NavLink>
 
           <NavLink

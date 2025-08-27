@@ -1,9 +1,16 @@
 "use client"
 import { Phone, Video, MoreVertical, Users, Hash, CheckCheck, Eye } from "lucide-react"
-import { Button } from "../ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import MessageInput from "./MessageInput"
+import { useState } from "react"
 
 const ChatWindow = ({ activeChat, chatType, messages, showReadReceipts, setShowReadReceipts }) => {
+  const [newMessage, setNewMessage] = useState("")
+
+  const handleSendMessage = (message) => {
+    console.log("[v0] Sending message:", message)
+    // Message sending logic would go here
+  }
+
   return (
     <div className="flex-1 flex flex-col">
       {/* Chat Header */}
@@ -23,49 +30,57 @@ const ChatWindow = ({ activeChat, chatType, messages, showReadReceipts, setShowR
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100">
+            <button className="p-2 rounded-lg text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 transition-colors duration-200">
               <Phone className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100">
+            </button>
+            <button className="p-2 rounded-lg text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 transition-colors duration-200">
               <Video className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100">
+            </button>
+            <button className="p-2 rounded-lg text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 transition-colors duration-200">
               <MoreVertical className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-slate-900/20 to-purple-900/10">
+      <div
+        className="flex-1 overflow-y-auto p-6 space-y-6 bg-white custom-scrollbar"
+        style={{ maxHeight: "calc(100vh - 280px)" }} // Adjusted maxHeight to account for header and input area
+      >
         {messages.map((message) => (
           <div key={message.id} className={`flex gap-4 ${message.isOwn ? "flex-row-reverse" : ""}`}>
             {!message.isOwn && (
-              <Avatar className="w-10 h-10 border-2 border-purple-400/30 shadow-lg shadow-purple-500/20">
-                <AvatarImage
+              <div className="w-10 h-10 border-2 border-purple-400/30 shadow-lg shadow-purple-500/20 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center text-white font-medium">
+                <img
                   src={`/abstract-geometric-shapes.png?height=40&width=40&query=${message.sender}`}
                   alt={message.sender}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none"
+                    e.target.nextSibling.style.display = "flex"
+                  }}
                 />
-                <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-500 text-white">
+                <span style={{ display: "none" }} className="w-full h-full flex items-center justify-center">
                   {message.sender
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
-                </AvatarFallback>
-              </Avatar>
+                </span>
+              </div>
             )}
             <div className={`flex-1 max-w-2xl ${message.isOwn ? "text-right" : ""}`}>
               {!message.isOwn && (
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-purple-100">{message.sender}</span>
-                  <span className="text-xs text-purple-300/60">{message.time}</span>
+                  <span className="font-medium text-purple-800">{message.sender}</span>
+                  <span className="text-xs text-gray-500">{message.time}</span>
                 </div>
               )}
               <div
                 className={`inline-block p-4 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl ${
                   message.isOwn
-                    ? "bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-br-md shadow-purple-500/20 hover:shadow-purple-500/30"
-                    : "bg-gradient-to-r from-slate-800/80 to-purple-900/40 border border-purple-500/20 text-purple-100 rounded-bl-md backdrop-blur-sm"
+                    ? "bg-gradient-to-br from-purple-500 to-violet-500 text-white rounded-br-md shadow-purple-500/30 hover:shadow-purple-500/40"
+                    : "bg-gradient-to-br from-purple-100 to-violet-100 text-purple-900 rounded-bl-md shadow-purple-500/20 hover:shadow-purple-500/30 border border-purple-200"
                 }`}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
@@ -73,23 +88,31 @@ const ChatWindow = ({ activeChat, chatType, messages, showReadReceipts, setShowR
 
               {message.isOwn && (
                 <div className="flex items-center justify-end gap-2 mt-1">
-                  <span className="text-xs text-purple-300/60">{message.time}</span>
+                  <span className="text-xs text-gray-500">{message.time}</span>
                   <div className="flex items-center gap-1">
-                    <CheckCheck className="w-3 h-3 text-purple-400" />
+                    <CheckCheck className="w-3 h-3 text-purple-600" />
                     <button
                       onClick={() => setShowReadReceipts(showReadReceipts === message.id ? null : message.id)}
                       className="flex -space-x-1 hover:space-x-0 transition-all duration-200"
                     >
                       {message.readBy?.slice(0, 3).map((reader, index) => (
-                        <Avatar key={reader.id} className="w-4 h-4 border border-purple-400/50">
-                          <AvatarImage src={reader.avatar || "/placeholder.svg"} alt={reader.name} />
-                          <AvatarFallback className="bg-purple-500 text-white text-xs">
-                            {reader.name
+                        <div
+                          key={reader.id}
+                          className="w-4 h-4 border border-purple-400/50 rounded-full overflow-hidden bg-purple-500 flex items-center justify-center text-white text-xs"
+                        >
+                          {reader.avatar ? (
+                            <img
+                              src={reader.avatar || "/placeholder.svg"}
+                              alt={reader.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            reader.name
                               .split(" ")
                               .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
+                              .join("")
+                          )}
+                        </div>
                       ))}
                       {message.readBy?.length > 3 && (
                         <div className="w-4 h-4 rounded-full bg-purple-500/20 border border-purple-400/50 flex items-center justify-center">
@@ -110,15 +133,20 @@ const ChatWindow = ({ activeChat, chatType, messages, showReadReceipts, setShowR
                   <div className="space-y-1">
                     {message.readBy.map((reader) => (
                       <div key={reader.id} className="flex items-center gap-2">
-                        <Avatar className="w-5 h-5 border border-purple-400/30">
-                          <AvatarImage src={reader.avatar || "/placeholder.svg"} alt={reader.name} />
-                          <AvatarFallback className="bg-purple-500 text-white text-xs">
-                            {reader.name
+                        <div className="w-5 h-5 border border-purple-400/30 rounded-full overflow-hidden bg-purple-500 flex items-center justify-center text-white text-xs">
+                          {reader.avatar ? (
+                            <img
+                              src={reader.avatar || "/placeholder.svg"}
+                              alt={reader.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            reader.name
                               .split(" ")
                               .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
+                              .join("")
+                          )}
+                        </div>
                         <span className="text-xs text-purple-100">{reader.name}</span>
                       </div>
                     ))}
@@ -143,6 +171,13 @@ const ChatWindow = ({ activeChat, chatType, messages, showReadReceipts, setShowR
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Message Input */}
+      <div className="flex-shrink-0">
+        {" "}
+        {/* Added flex-shrink-0 to prevent input from being compressed */}
+        <MessageInput newMessage={newMessage} setNewMessage={setNewMessage} onSendMessage={handleSendMessage} />
       </div>
     </div>
   )

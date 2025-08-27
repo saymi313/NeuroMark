@@ -18,6 +18,7 @@ import EmployeeAttendance from "./portals/employee/pages/Attendance";
 import Profile from "./portals/employee/pages/Profile";
 import Reports from "./portals/employee/pages/Reports";
 import Schedule from "./portals/employee/pages/Schedule";
+import Chat from "./portals/employee/pages/Chat";
 
 import "./App.css";
 
@@ -44,6 +45,7 @@ function App() {
           <Route index element={<EmployeeHome />} />
           <Route path="attendance" element={<EmployeeAttendance />} />
           <Route path="leave-request" element={<LeaveRequest />} />
+          <Route path="chat" element={<Chat />} />
           <Route path="profile" element={<Profile />} />
           <Route path="reports" element={<Reports />} />
           <Route path="schedule" element={<Schedule />} />

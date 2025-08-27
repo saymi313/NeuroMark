@@ -2,17 +2,13 @@
 
 import { useState } from "react"
 import { Plus, Settings, X, UserPlus } from "lucide-react"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import ChatSidebar from "../../components/ChatComponents/ChatSidebar"
 import ChatWindow from "../../components/ChatComponents/ChatWindow"
-import MessageInput from "../../components/ChatComponents/MessageInput"
 
 const users = [
   {
     id: 1,
-    name: "Fatima Khan",
+    name: "Farrakh Saeed",
     role: "Product Manager",
     avatar: "/professional-woman-diverse.png",
     status: "online",
@@ -20,8 +16,8 @@ const users = [
   },
   {
     id: 2,
-    name: "Ahmed Ali",
-    role: "Senior Developer",
+    name: "Usairam Saeed",
+    role: "Software Engineer",
     avatar: "/professional-man.png",
     status: "online",
     lastSeen: "now",
@@ -98,7 +94,7 @@ const groups = [
 const messages = [
   {
     id: 1,
-    sender: "Fatima Khan",
+    sender: "Farrakh Saeed",
     content: "Hey team! Just wanted to update everyone on the project progress. We're ahead of schedule!",
     time: "2:30 PM",
     reactions: { "👍": 3, "🎉": 2 },
@@ -202,213 +198,219 @@ const ChatApp = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900">
-      <div className="border-b border-purple-500/20 bg-gradient-to-r from-purple-900/30 via-violet-900/30 to-purple-900/30 backdrop-blur-xl shadow-lg shadow-purple-500/10">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 via-violet-300 to-purple-300 bg-clip-text text-transparent">
-              Chat Hub
-            </h1>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setShowNewGroupModal(true)}
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-purple-500/10 border-purple-400/30 text-purple-200 hover:bg-purple-500/20 hover:border-purple-400/50 backdrop-blur-sm"
-              >
-                <Plus className="w-4 h-4" />
-                New Group
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-purple-500/10 border-purple-400/30 text-purple-200 hover:bg-purple-500/20 hover:border-purple-400/50 backdrop-blur-sm"
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
+    <div className="h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 p-4">
+      <div className="h-full bg-gradient-to-br from-slate-950/80 via-purple-950/80 to-slate-900/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl shadow-2xl shadow-purple-500/10 flex flex-col overflow-hidden">
+        <div className="border-b border-purple-500/20 bg-gradient-to-r from-purple-900/30 via-violet-900/30 to-purple-900/30 backdrop-blur-xl shadow-lg shadow-purple-500/10 flex-shrink-0">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 via-violet-300 to-purple-300 bg-clip-text text-transparent">
+                Chat Hub
+              </h1>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowNewGroupModal(true)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm bg-purple-500/10 border border-purple-400/30 text-purple-200 hover:bg-purple-500/20 hover:border-purple-400/50 backdrop-blur-sm rounded-md transition-all duration-200"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Group
+                </button>
+                <button className="flex items-center gap-2 px-3 py-2 text-sm bg-purple-500/10 border border-purple-400/30 text-purple-200 hover:bg-purple-500/20 hover:border-purple-400/50 backdrop-blur-sm rounded-md transition-all duration-200">
+                  <Settings className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex h-[calc(100vh-88px)]">
-        <ChatSidebar
-          users={users}
-          groups={groups}
-          activeChat={activeChat}
-          setActiveChat={setActiveChat}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          chatType={chatType}
-          setChatType={setChatType}
-          showDropdown={showDropdown}
-          setShowDropdown={setShowDropdown}
-          setShowNewGroupModal={setShowNewGroupModal}
-          setSelectedUser={setSelectedUser}
-          setShowProfile={setShowProfile}
-          showChatOptions={showChatOptions}
-          setShowChatOptions={setShowChatOptions}
-          mutedChats={mutedChats}
-          setMutedChats={setMutedChats}
-          pinnedChats={pinnedChats}
-          setPinnedChats={setPinnedChats}
-        />
-
-        <div className="flex-1 flex flex-col">
-          <ChatWindow
+        <div className="flex flex-1 overflow-hidden">
+          <ChatSidebar
+            users={users}
+            groups={groups}
             activeChat={activeChat}
+            setActiveChat={setActiveChat}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
             chatType={chatType}
-            messages={chatMessages}
-            showReadReceipts={showReadReceipts}
-            setShowReadReceipts={setShowReadReceipts}
+            setChatType={setChatType}
+            showDropdown={showDropdown}
+            setShowDropdown={setShowDropdown}
+            setShowNewGroupModal={setShowNewGroupModal}
+            setSelectedUser={setSelectedUser}
+            setShowProfile={setShowProfile}
+            showChatOptions={showChatOptions}
+            setShowChatOptions={setShowChatOptions}
+            mutedChats={mutedChats}
+            setMutedChats={setMutedChats}
+            pinnedChats={pinnedChats}
+            setPinnedChats={setPinnedChats}
           />
 
-          <MessageInput newMessage={newMessage} setNewMessage={setNewMessage} onSendMessage={handleSendMessage} />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <ChatWindow
+              activeChat={activeChat}
+              chatType={chatType}
+              messages={chatMessages}
+              showReadReceipts={showReadReceipts}
+              setShowReadReceipts={setShowReadReceipts}
+              newMessage={newMessage}
+              setNewMessage={setNewMessage}
+              onSendMessage={handleSendMessage}
+            />
+          </div>
+
+          {/* Profile Sidebar */}
+          {showProfile && selectedUser && (
+            <div className="w-80 h-full border-l border-purple-500/20 bg-gradient-to-b from-purple-900/20 via-slate-900/40 to-purple-900/20 backdrop-blur-xl overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-purple-100">Profile</h3>
+                  <button
+                    onClick={() => setShowProfile(false)}
+                    className="p-2 text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 rounded-md transition-colors duration-200"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="text-center mb-6">
+                  <div className="relative inline-block">
+                    <div className="w-20 h-20 rounded-full border-4 border-purple-400/30 shadow-xl shadow-purple-500/20 overflow-hidden bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
+                      {selectedUser.avatar ? (
+                        <img
+                          src={selectedUser.avatar || "/placeholder.svg"}
+                          alt={selectedUser.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-xl font-semibold">
+                          {selectedUser.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </span>
+                      )}
+                    </div>
+                    <div
+                      className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-purple-900 ${getStatusColor(selectedUser.status)} shadow-lg`}
+                    ></div>
+                  </div>
+                  <h4 className="text-xl font-semibold text-purple-100 mt-3">{selectedUser.name}</h4>
+                  <p className="text-purple-200/70">{selectedUser.role}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Profile Sidebar */}
-        {showProfile && selectedUser && (
-          <div className="w-80 border-l border-purple-500/20 bg-gradient-to-b from-purple-900/20 via-slate-900/40 to-purple-900/20 backdrop-blur-xl">
-            {/* ... existing profile code ... */}
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-purple-100">Profile</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowProfile(false)}
-                  className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="text-center mb-6">
-                <div className="relative inline-block">
-                  <Avatar className="w-20 h-20 border-4 border-purple-400/30 shadow-xl shadow-purple-500/20">
-                    <AvatarImage src={selectedUser.avatar || "/placeholder.svg"} alt={selectedUser.name} />
-                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-500 text-white text-xl">
-                      {selectedUser.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div
-                    className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-4 border-purple-900 ${getStatusColor(selectedUser.status)} shadow-lg`}
-                  ></div>
+        {/* New Group Modal */}
+        {showNewGroupModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl shadow-2xl shadow-purple-500/20 w-full max-w-md mx-4">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-purple-100">Create New Group</h3>
+                  <button
+                    onClick={() => {
+                      setShowNewGroupModal(false)
+                      setNewGroupName("")
+                      setSelectedMembers([])
+                    }}
+                    className="p-2 text-purple-200 hover:bg-purple-500/10 hover:text-purple-100 rounded-md transition-colors duration-200"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <h4 className="text-xl font-semibold text-purple-100 mt-3">{selectedUser.name}</h4>
-                <p className="text-purple-200/70">{selectedUser.role}</p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-purple-200 mb-2">Group Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter group name..."
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      className="w-full px-3 py-2 bg-purple-950/30 border border-purple-400/30 text-purple-100 placeholder:text-purple-300/60 focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20 rounded-md outline-none transition-all duration-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-purple-200 mb-2">Add Members</label>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {users.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-colors duration-200"
+                        >
+                          <input
+                            type="checkbox"
+                            id={`user-${user.id}`}
+                            checked={selectedMembers.includes(user.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedMembers([...selectedMembers, user.id])
+                              } else {
+                                setSelectedMembers(selectedMembers.filter((id) => id !== user.id))
+                              }
+                            }}
+                            className="w-4 h-4 text-purple-600 bg-purple-950/30 border-purple-400/30 rounded focus:ring-purple-500/20"
+                          />
+                          <div className="w-8 h-8 rounded-full border border-purple-400/30 overflow-hidden bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
+                            {user.avatar ? (
+                              <img
+                                src={user.avatar || "/placeholder.svg"}
+                                alt={user.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-white text-xs font-semibold">
+                                {user.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </span>
+                            )}
+                          </div>
+                          <label htmlFor={`user-${user.id}`} className="flex-1 text-sm text-purple-100 cursor-pointer">
+                            {user.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => {
+                      setShowNewGroupModal(false)
+                      setNewGroupName("")
+                      setSelectedMembers([])
+                    }}
+                    className="flex-1 px-4 py-2 bg-purple-500/10 border border-purple-400/30 text-purple-200 hover:bg-purple-500/20 rounded-md transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (newGroupName.trim() && selectedMembers.length > 0) {
+                        console.log("[v0] Creating group:", newGroupName, "with members:", selectedMembers)
+                        setShowNewGroupModal(false)
+                        setNewGroupName("")
+                        setSelectedMembers([])
+                      }
+                    }}
+                    disabled={!newGroupName.trim() || selectedMembers.length === 0}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white shadow-lg shadow-purple-500/30 rounded-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Create Group
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
       </div>
-
-      {/* New Group Modal */}
-      {showNewGroupModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-gradient-to-br from-slate-900/95 to-purple-900/95 backdrop-blur-xl border border-purple-500/30 rounded-2xl shadow-2xl shadow-purple-500/20 w-full max-w-md mx-4">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-purple-100">Create New Group</h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowNewGroupModal(false)
-                    setNewGroupName("")
-                    setSelectedMembers([])
-                  }}
-                  className="text-purple-200 hover:bg-purple-500/10 hover:text-purple-100"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-purple-200 mb-2">Group Name</label>
-                  <Input
-                    placeholder="Enter group name..."
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    className="bg-purple-950/30 border-purple-400/30 text-purple-100 placeholder:text-purple-300/60 focus:border-purple-400/60 focus:ring-purple-400/20"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-purple-200 mb-2">Add Members</label>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {users.map((user) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-purple-500/10 transition-colors duration-200"
-                      >
-                        <input
-                          type="checkbox"
-                          id={`user-${user.id}`}
-                          checked={selectedMembers.includes(user.id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedMembers([...selectedMembers, user.id])
-                            } else {
-                              setSelectedMembers(selectedMembers.filter((id) => id !== user.id))
-                            }
-                          }}
-                          className="w-4 h-4 text-purple-600 bg-purple-950/30 border-purple-400/30 rounded focus:ring-purple-500/20"
-                        />
-                        <Avatar className="w-8 h-8 border border-purple-400/30">
-                          <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-violet-500 text-white text-xs">
-                            {user.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <label htmlFor={`user-${user.id}`} className="flex-1 text-sm text-purple-100 cursor-pointer">
-                          {user.name}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowNewGroupModal(false)
-                    setNewGroupName("")
-                    setSelectedMembers([])
-                  }}
-                  className="flex-1 bg-purple-500/10 border-purple-400/30 text-purple-200 hover:bg-purple-500/20"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (newGroupName.trim() && selectedMembers.length > 0) {
-                      console.log("[v0] Creating group:", newGroupName, "with members:", selectedMembers)
-                      setShowNewGroupModal(false)
-                      setNewGroupName("")
-                      setSelectedMembers([])
-                    }
-                  }}
-                  disabled={!newGroupName.trim() || selectedMembers.length === 0}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 shadow-lg shadow-purple-500/30 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Create Group
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
